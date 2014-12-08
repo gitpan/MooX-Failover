@@ -1,0 +1,56 @@
+package MooX::Failover;
+
+use Carp;
+use Class::Load qw/ try_load_class /;
+use PerlX::Maybe;
+
+use version 0.77; our $VERSION = version->declare('v0.1.0');
+
+# RECOMMEND PREREQ: Class::Load::XS
+# RECOMMEND PREREQ: PerlX::Maybe::XS
+
+sub import {
+    my ($class) = @_;
+
+    my $target = caller;
+
+    my $new = $target->can('new')
+      or croak "No constructor found in ${target}";
+
+    *{"${target}::new"} = sub {
+        my ( $class, %args ) = @_;
+
+        my $failover = $args{failover_to};
+        my $next = ( ref $failover ) ? $failover : { class => $failover };
+
+        $next->{err_arg} = 'error' unless exists $next->{err_arg};
+
+        eval { $class->$new(%args) } // do {
+
+            my $error = $@;
+            my $next_next;
+            my $next_class = $next->{class};
+            if ( ref $next_class ) {
+                $next_class = shift @{ $next->{class} };
+                $next_next  = $next;
+            }
+
+            croak $error unless $next_class;
+
+            try_load_class($next_class)
+              or croak "unable to load class ${next_class}";
+
+            %args = %{ $next->{args} } if $next->{args};
+
+            $next_class->new(
+                %args,
+                maybe $next->{err_arg} => $error,
+                maybe 'failover_to'    => $next_next,
+            );
+
+        };
+
+    };
+}
+
+1;
