@@ -4,7 +4,7 @@ MooX::Failover - Instantiate Moo classes with failover
 
 =head1 VERSION
 
-v0.1.0_01
+v0.2.0_01
 
 =head1 SYNOPSIS
 
@@ -13,14 +13,19 @@ v0.1.0_01
   package MyClass;
 
   use Moo;
+  use MooX::Failover;
 
   has 'attr' => ( ... );
 
-  with 'MooX::Failover'; # use *after* attributes are declared
+  # after attributes are defined:
+
+  failover_to 'OtherClass';
+
+  ...
 
   # When using the class
 
-  my $obj = MyClass->new( %args, failover_to => 'OtherClass' );
+  my $obj = MyClass->new( %args );
 
   # If %args contains missing or invalid values or new otherwise
   # fails, then $obj will be of type "OtherClass".
@@ -42,6 +47,10 @@ This distribution requires the following modules:
 
 =item * L<Moo>
 
+=item * L<Sub::Defer>
+
+=item * L<Sub::Quote>
+
 =item * L<Test::Most>
 
 =back
@@ -56,11 +65,49 @@ This distribution recommends the following modules:
 
 =head1 RECENT CHANGES
 
+=head2 Enhancements
+
 =over 4
 
 =item * 
 
-An initial port of MooseX-Failover to Moo.
+Significant optimizations at the expense of incompatability.
+
+=item * 
+
+Added the ability to use an alternative name of the constructor for the failover class.
+
+=item * 
+
+Arguments for the constructor can be a hash reference, array reference or scalar.
+
+=item * 
+
+Added the ability to save the name of the class that triggered to error.
+
+=back
+
+=head2 Incompatability
+
+=over 4
+
+=item * 
+
+Rewrote the interface entirely, so that the failover is specified as part of the class definition. See the POD for details.
+
+=back
+
+=head2 Other Changes
+
+=over 4
+
+=item * 
+
+Added missing MANIFEST.SKIP and removed dist.ini from distribution.
+
+=item * 
+
+Added an example using Web::Machine.
 
 =back
 
@@ -74,30 +121,20 @@ If a class cannot be instantiated because of invalid arguments
 (perhaps from an untrusted source), then instead it returns the
 failover class (passing the same arguments to that class).
 
-This allows for cleaner design, by not forcing you to duplicate type
-checking for class parameters.
-
-Note that this is roughly equivalent to using
+It is roughly equivalent to using
 
   my $obj = eval { MyClass->new(%args) //
      OtherClass->new( %args, error => $@ );
 
-Note that your failover class should support the same methods as the
-original class.  A use case for this role would be for instantiating
-L<Web::Machine::Resource> objects, where the failover is a
-Web::Machine::Resource object that returns an error page.
+This allows for cleaner design, by not forcing you to duplicate type
+checking for class parameters.
 
-Ideally, your failover class would satisy the Liskov Substitution
-Principle, so that (roughly) all provable properties of the original
-class are also provable of the failover class.  In practice, we only
-care about the properties (methods and attributes) that are actually
-used in our programs.
-
-=head1 CAVEATS
-
-This module is experimental. It works, but the current version is
-significantly slower than using a simple eval or try block.  So it's
-not recommended for production code.
+A use case for this module is for instantiating
+L<Web::Machine::Resource> objects, where a resource class's attributes
+correspond to URL arguments.  A type failure would normally cause an
+internal serror error (HTTP 500).  Using L<MooX::Failover>, we can
+return a different resource object that examines the error, and
+returns a more appropriate error code, e.g. bad request (HTTP 400).
 
 =head1 SEE ALSO
 
@@ -114,8 +151,6 @@ Robert Rothenberg C<<rrwo@thermeon.com>>
 =item Thermeon Europe.
 
 =item Piers Cawley.
-
-=item Graham Knop.
 
 =back
 

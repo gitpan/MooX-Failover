@@ -18,9 +18,11 @@ requires:
   Carp: '0'
   Class::Load: '0.20'
   Moo: '0'
+  Sub::Defer: '0'
+  Sub::Quote: '0'
   Test::Most: '0'
   perl: '5.010'
 resources:
   bugtracker: https://github.com/robrwo/MooX-Failover/issues
   repository: git://github.com/robrwo/MooX-Failover.git
-version: v0.1.0_01
+version: v0.2.0_01

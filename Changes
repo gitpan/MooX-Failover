@@ -1,5 +1,28 @@
 Revision history for MooX-Failover
 
+v0.2.0_01 2014-12-12 15:49:50+00:00 Europe/London
+  [Incompatability]
+  - Rewrote the interface entirely, so that the failover is specified
+    as part of the class definition. See the POD for details.
+
+  [Enhancements]
+  - Significant optimizations at the expense of incompatability.
+
+  - Added the ability to use an alternative name of the constructor
+    for the failover class.
+
+  - Arguments for the constructor can be a hash reference, array
+    reference or scalar.
+
+  - Added the ability to save the name of the class that triggered to
+    error.
+
+  [Other Changes]
+  - Added missing MANIFEST.SKIP and removed dist.ini from
+    distribution.
+
+  - Added an example using Web::Machine.
+
 v0.1.0_01 2014-12-08 17:51:22+00:00 Europe/London
   - An initial port of MooseX-Failover to Moo.
 

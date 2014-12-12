@@ -24,9 +24,11 @@ my %WriteMakefileArgs = (
     "Carp" => 0,
     "Class::Load" => "0.20",
     "Moo" => 0,
+    "Sub::Defer" => 0,
+    "Sub::Quote" => 0,
     "Test::Most" => 0
   },
-  "VERSION" => "v0.1.0_01",
+  "VERSION" => "v0.2.0_01",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -38,6 +40,8 @@ my %FallbackPrereqs = (
   "Class::Load" => "0.20",
   "ExtUtils::MakeMaker" => 0,
   "Moo" => 0,
+  "Sub::Defer" => 0,
+  "Sub::Quote" => 0,
   "Test::Most" => 0
 );
 
