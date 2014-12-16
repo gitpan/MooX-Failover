@@ -1,5 +1,20 @@
 Revision history for MooX-Failover
 
+v0.2.1    2014-12-16 12:20:06+00:00 UTC
+  [Enhancements]
+  - Added check that we don't failover to the same class.
+
+  - Minor performance tweaks.
+
+  [Documentation]
+  - Minor wording changes.
+
+  [Bug Fixes]
+  - Fixed bad prereqs for tests, which now uses Types::Standard.
+
+  [Other Changes]
+  - Added more tests
+
 v0.2.0_01 2014-12-12 15:49:50+00:00 Europe/London
   [Incompatability]
   - Rewrote the interface entirely, so that the failover is specified

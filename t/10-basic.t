@@ -1,25 +1,12 @@
 {
 
-    package Failover;
-
-    use Moo;
-    use MooX::Types::MooseLike::Base qw/ Str /;
-
-    has error => ( is => 'ro', );
-    has class => (
-        is  => 'ro',
-        isa => Str
-    );
-}
-
-{
-
     package Sub1;
 
     use Moo;
-    use MooX::Types::MooseLike::Base qw/ Int Str /;
+    use Types::Standard qw/ Int Str /;
 
     use MooX::Failover;
+    use lib 't/lib';
 
     has num => (
         is  => 'ro',
@@ -49,7 +36,7 @@
     use Moo;
     extends 'Sub1';
 
-    use MooX::Types::MooseLike::Base qw/ Str /;
+    use Types::Standard qw/ Str /;
 
     has q_str => (
         is       => 'ro',
@@ -87,7 +74,7 @@ use Test::Most;
 }
 
 {
-    note "errors with no failover";
+    note "errors with failover";
 
     my $obj = Sub1->new( num => 123, );
     isa_ok $obj, 'Failover';

@@ -1,5 +1,5 @@
 package MooX::Failover;
-$MooX::Failover::VERSION = 'v0.2.0_01';
+$MooX::Failover::VERSION = 'v0.2.1';
 require Moo;
 
 use Carp;
@@ -9,7 +9,7 @@ use Sub::Quote qw/ quote_sub /;
 
 {
     use version 0.77;
-    $MooX::Failover::VERSION = version->declare('v0.2.0_01');
+    $MooX::Failover::VERSION = version->declare('v0.2.1');
 }
 
 # RECOMMEND PREREQ: Class::Load::XS
@@ -59,9 +59,9 @@ L<How to install CPAN modules|http://www.cpan.org/modules/INSTALL.html>.
 
 =head1 DESCRIPTION
 
-This role provides constructor failover for L<Moo> classes.
+This module provides constructor failover for L<Moo> classes.
 
-If a class cannot be instantiated because of invalid arguments
+For example, if a class cannot be instantiated because of invalid arguments
 (perhaps from an untrusted source), then instead it returns the
 failover class (passing the same arguments to that class).
 
@@ -71,7 +71,7 @@ It is roughly equivalent to using
      OtherClass->new( %args, error => $@ );
 
 This allows for cleaner design, by not forcing you to duplicate type
-checking for class parameters.
+checking for constructor parameters.
 
 A use case for this module is for instantiating
 L<Web::Machine::Resource> objects, where a resource class's attributes
@@ -79,6 +79,12 @@ correspond to URL arguments.  A type failure would normally cause an
 internal serror error (HTTP 500).  Using L<MooX::Failover>, we can
 return a different resource object that examines the error, and
 returns a more appropriate error code, e.g. bad request (HTTP 400).
+
+=begin :readme
+
+See the module documentation for L<MooX::Failover> for more information.
+
+=end :readme
 
 =for readme stop
 
@@ -201,6 +207,7 @@ sub failover_to {
       or croak "unable to load " . $next{class};
 
     my $caller = caller;
+    croak "cannot failover to self" if $next{class} eq $caller;
 
     $next{constructor} //= 'new';
 
@@ -210,8 +217,11 @@ sub failover_to {
     $next{err_arg}   //= 'error' unless exists $next{err_arg};
     $next{class_arg} //= 'class' unless exists $next{class_arg};
 
-    my $name = "${caller}::new";
-    my $orig = undefer_sub \&{$name};
+    my $orig_name = "${caller}::new";
+    my $orig_code = undefer_sub \&{$orig_name};
+
+    my $next_name = $next{class} . '::' . $next{constructor};
+    my $next_code = undefer_sub \&{$next_name};
 
     my @args = _ref_to_list($next);
     push @args, $next{err_arg} . ' => $@' if defined $next{err_arg};
@@ -219,12 +229,13 @@ sub failover_to {
       if defined $next{class_arg};
 
     my $code_str =
-        'my $class = shift; eval { $class->$orig(@_); }' . ' // '
-      . $next{class} . '->'
-      . $next{constructor} . '('
+        'eval { shift->$orig(@_); }' . ' // ' . $next{class} . '->$cont(' 
       . join( ',', @args ) . ')';
 
-    quote_sub $name, $code_str, { '$orig' => \$orig, };
+    quote_sub $orig_name, $code_str, {
+	'$orig' => \$orig_code,
+	'$cont' => \$next_code,
+    };
 }
 
 =for readme continue
@@ -241,7 +252,7 @@ Robert Rothenberg C<<rrwo@thermeon.com>>
 
 =over
 
-=item Thermeon Europe.
+=item Thermeon.
 
 =item Piers Cawley.
 
@@ -249,7 +260,7 @@ Robert Rothenberg C<<rrwo@thermeon.com>>
 
 =head1 COPYRIGHT
 
-Copyright 2014 Thermeon Europe.
+Copyright 2014 Thermeon Worldwide, PLC.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
