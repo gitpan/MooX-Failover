@@ -1,5 +1,24 @@
 Revision history for MooX-Failover
 
+v0.3.0    2014-12-17 13:06:55+00:00 Europe/London
+  [Documentation]
+  - Changed description of the "constructor" option to remove any
+    confusion which class it applies to.
+
+  - Documented the need for quoting values in the "args" option.
+
+  - Fixed typos in POD.
+
+  [Enhancements]
+  - Added the ability to specify an alternative constructor name
+    on the original class.
+
+  - Added the ability to pass all of the original arguments in a
+    single constructor parameter to the failover class.
+
+  [Bug Fixes]
+  - Fixed bug with handling the "args" option.
+
 v0.2.1    2014-12-16 12:20:06+00:00 UTC
   [Enhancements]
   - Added check that we don't failover to the same class.

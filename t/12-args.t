@@ -2,10 +2,14 @@
     package Failover2;
 
     use Moo;
-    use Types::Standard qw/ Str /;
+    use Types::Standard qw/ Str ArrayRef /;
 
     has 'error2' => ( is => 'ro' );
     has 'class2' => ( is => 'ro', isa => Str );
+
+    has 'num'  => ( is => 'ro' ); # can be anything
+
+    has 'args' => ( is => 'ro', isa => ArrayRef );
 
     our $count = 0;
 
@@ -43,7 +47,19 @@
         default  => 'wibble',
     );
 
-    failover_to 'Failover2' => ( err_arg => 'error2', class_arg => 'class2', constructor => 'alt_new' );
+    failover_to 'Failover2' => ( err_arg => 'error2', class_arg => 'class2', constructor => 'alt_new' , args => [  map { "'$_'" } ( num => 1234 ) ], );
+
+    sub other {
+      die "bad constructor";
+    }
+
+    failover_to 'Failover2' => (
+                                err_arg => 'error2', class_arg => 'class2', constructor => 'alt_new',
+      from_constructor => 'other',
+      args => [ ],
+      orig_arg => 'args',
+    );
+
 }
 
 {
@@ -95,6 +111,7 @@ use Test::Most;
 
     my $obj = Sub1->new( num => 123, );
     isa_ok $obj, 'Failover2';
+    is $obj->num, 1234, 'specific argument passed';
     is $Failover2::count, 1, 'alternative constructor run';
     like $obj->error2, qr/Missing required arguments: r_str/, 'expected error';
     is $obj->class2, 'Sub1', 'expected class';
@@ -107,6 +124,19 @@ use Test::Most;
     isa_ok $obj, 'Failover2';
     like $obj->error2, qr/Missing required arguments: r_str/, 'expected error';
     is $obj->class2, 'Sub1', 'expected class';
+}
+
+{
+    note "errors with failover using alternative from_constructor";
+
+    my $obj = Sub1->other( num => 123, nonsense => 'x' );
+    isa_ok $obj, 'Failover2';
+    like $obj->error2, qr/bad constructor/, 'expected error';
+    is $obj->class2, 'Sub1', 'expected class';
+
+    is $obj->num, undef, 'no original argument';
+    is_deeply $obj->args, [ num => 123, nonsense => 'x' ], 'extected orig_args';
+
 }
 
 

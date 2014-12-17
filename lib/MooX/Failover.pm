@@ -1,5 +1,8 @@
 package MooX::Failover;
-$MooX::Failover::VERSION = 'v0.2.1';
+$MooX::Failover::VERSION = 'v0.3.0';
+use strict;
+use warnings;
+
 require Moo;
 
 use Carp;
@@ -9,7 +12,7 @@ use Sub::Quote qw/ quote_sub /;
 
 {
     use version 0.77;
-    $MooX::Failover::VERSION = version->declare('v0.2.1');
+    $MooX::Failover::VERSION = version->declare('v0.3.0');
 }
 
 # RECOMMEND PREREQ: Class::Load::XS
@@ -118,7 +121,26 @@ The name of the class to fail over to.  It defaults to C<$class>.
 
 =item C<constructor>
 
-The name of the constructor method. It defaults to "new".
+The name of the constructor method in the failover class. It defaults
+to "new".
+
+=item C<from_constructor>
+
+The name of the constructor in the class that you are adding failover
+to. It defaults to "new".
+
+Note that you can add failovers to multiple constructors. Suppose your
+class has a "new" constructor, as well as a "new_from_file"
+constructor that loads information from a file and then calls "new".
+You can specify failovers for both of the constructors:
+
+  failover_to 'OtherClass';
+
+  failover_to 'OtherClass' => (
+    from_constructor => 'new_from_file',
+  );
+
+This option was added in v0.3.0.
 
 =item C<args>
 
@@ -127,6 +149,16 @@ pass the same arguments as the original class.
 
 This can be a scalar (single argument), hash reference or array
 reference.
+
+Note that the options are treated are treated as raw Perl code.  To
+use specify options, you need to explicitly add quotes to symbols, for
+example:
+
+  failover_to 'OtherClass' => (
+    args => [ map { "'$_'" } ( foo => 'bar' ) ],
+  );
+
+This option did not work properly until v0.3.0.
 
 =item C<err_arg>
 
@@ -143,10 +175,28 @@ To disable it, set it to C<undef>.
 
 =item C<class_arg>
 
-This is the name of the constructor argument to pass the name class
-that failed.  It defaults to "class".
+This is the name of the constructor argument to pass the name of the
+class that failed.  It defaults to "class".
 
 To disable it, set it to C<undef>.
+
+=item C<orig_arg>
+
+This is the name of the constructor to pass an array reference of the
+original arguments passed to class.  It is C<undef> by default.
+
+The original arguments are already passed to the failover class, but
+this can be used to pass them all in a specific parameter.
+
+If you do not want the original arguments passed to the failover class
+separately, set the C<args> option to be empty:
+
+  failover_to 'OtherClass' => (
+    args      => [ ],
+    orig_args => 'failed_args',
+  );
+
+This option was added in v0.3.0.
 
 =back
 
@@ -178,7 +228,7 @@ sub unimport {
 sub _ref_to_list {
     my ($next) = @_;
 
-    my $args = $next{args} // ['@_'];
+    my $args = $next->{args} // ['@_'];
     if ( my $ref = ref $args ) {
 
         return ( @{$args} ) if $ref eq 'ARRAY';
@@ -209,6 +259,7 @@ sub failover_to {
     my $caller = caller;
     croak "cannot failover to self" if $next{class} eq $caller;
 
+    $next{from_constructor} //= 'new';
     $next{constructor} //= 'new';
 
     croak $next{class} . ' cannot ' . $next{constructor}
@@ -217,19 +268,20 @@ sub failover_to {
     $next{err_arg}   //= 'error' unless exists $next{err_arg};
     $next{class_arg} //= 'class' unless exists $next{class_arg};
 
-    my $orig_name = "${caller}::new";
+    my $orig_name = $caller . '::' . $next{from_constructor};
     my $orig_code = undefer_sub \&{$orig_name};
 
     my $next_name = $next{class} . '::' . $next{constructor};
     my $next_code = undefer_sub \&{$next_name};
 
-    my @args = _ref_to_list($next);
+    my @args = _ref_to_list(\%next);
     push @args, $next{err_arg} . ' => $@' if defined $next{err_arg};
     push @args, $next{class_arg} . " => '${caller}'"
       if defined $next{class_arg};
+    push @args, $next{orig_arg} . ' => [@_]' if defined $next{orig_arg};
 
     my $code_str =
-        'eval { shift->$orig(@_); }' . ' // ' . $next{class} . '->$cont(' 
+        'eval { shift->$orig(@_); }' . ' // ' . $next{class} . '->$cont('
       . join( ',', @args ) . ')';
 
     quote_sub $orig_name, $code_str, {
