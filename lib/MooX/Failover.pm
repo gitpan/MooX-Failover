@@ -1,5 +1,5 @@
 package MooX::Failover;
-$MooX::Failover::VERSION = 'v0.3.1';
+$MooX::Failover::VERSION = 'v0.3.2';
 use strict;
 use warnings;
 
@@ -12,7 +12,7 @@ use Sub::Quote qw/ quote_sub /;
 
 {
     use version 0.77;
-    $MooX::Failover::VERSION = version->declare('v0.3.1');
+    $MooX::Failover::VERSION = version->declare('v0.3.2');
 }
 
 # RECOMMEND PREREQ: Class::Load::XS
