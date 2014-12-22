@@ -1,5 +1,14 @@
 Revision history for MooX-Failover
 
+v0.3.1    2014-12-22 15:10:27+00:00 Europe/London
+  [Documentation]
+  - Reorganized documentation, and added more information.
+
+  - Added acknowledgment.
+
+  [Other Changes]
+  - Added more tests.
+
 v0.3.0    2014-12-17 13:06:55+00:00 Europe/London
   [Documentation]
   - Changed description of the "constructor" option to remove any

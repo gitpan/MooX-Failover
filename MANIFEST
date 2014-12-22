@@ -12,4 +12,5 @@ t/10-basic.t
 t/11-errors.t
 t/12-args.t
 t/13-chained.t
+t/14-imports.t
 t/lib/Failover.pm
