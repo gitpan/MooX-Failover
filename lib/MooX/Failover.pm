@@ -1,5 +1,5 @@
 package MooX::Failover;
-$MooX::Failover::VERSION = 'v0.3.2';
+$MooX::Failover::VERSION = 'v0.3.3';
 use strict;
 use warnings;
 
@@ -12,7 +12,7 @@ use Sub::Quote qw/ quote_sub /;
 
 {
     use version 0.77;
-    $MooX::Failover::VERSION = version->declare('v0.3.2');
+    $MooX::Failover::VERSION = version->declare('v0.3.3');
 }
 
 # RECOMMEND PREREQ: Class::Load::XS
@@ -321,7 +321,7 @@ interface was redesigned significantly, to be more efficient.
 
 Robert Rothenberg C<<rrwo@thermeon.com>>
 
-=head1 Acknowledgements
+=head2 Acknowledgements
 
 =over
 
@@ -329,7 +329,7 @@ Robert Rothenberg C<<rrwo@thermeon.com>>
 
 =item Piers Cawley.
 
-=item Gareth Kirwan
+=item Gareth Kirwan.
 
 =back
 

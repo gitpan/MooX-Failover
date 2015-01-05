@@ -1,5 +1,18 @@
 Revision history for MooX-Failover
 
+v0.3.3    2015-01-05 16:04:04+00:00 Europe/London
+  [Other Changes]
+  - Minor tweaks to Changes file.
+
+  - Moved test prerequisties into test phase.
+
+v0.3.3    2014-12-24 10:07:09+00:00 Europe/London
+  [Documentation]
+  - Fixed typo in POD markup.
+
+  [Other Changes]
+  - Made prereq for version explicit.
+
 v0.3.2    2014-12-22 15:34:54+00:00 Europe/London
   [Other Changes]
   - Fixed tests to work with Moo v1.001000 or earlier.

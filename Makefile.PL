@@ -26,10 +26,13 @@ my %WriteMakefileArgs = (
     "Moo" => 0,
     "Sub::Defer" => 0,
     "Sub::Quote" => 0,
-    "Test::Most" => 0,
-    "Types::Standard" => 0
+    "Types::Standard" => 0,
+    "version" => "0.77"
   },
-  "VERSION" => "v0.3.2",
+  "TEST_REQUIRES" => {
+    "Test::Most" => 0
+  },
+  "VERSION" => "v0.3.3",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -44,7 +47,8 @@ my %FallbackPrereqs = (
   "Sub::Defer" => 0,
   "Sub::Quote" => 0,
   "Test::Most" => 0,
-  "Types::Standard" => 0
+  "Types::Standard" => 0,
+  "version" => "0.77"
 );
 
 
